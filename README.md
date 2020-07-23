@@ -17,6 +17,7 @@ The presentation is in Spansih and English, if anyone wants to contribute with a
 https://redis.io/commands  
 https://redis.io/topics/data-types-intro  
 https://www.tutorialspoint.com/redis/index.htm   
+https://redislabs.com/redis-in-action/  
   
 
 

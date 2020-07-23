@@ -16,6 +16,7 @@ import static org.obapanel.yaitredisandjedis.MakeRedisConnection.jedisNow;
 public class Slide17 {
 
     public static final String SCRIPT = "" +
+            "redis.call('ECHO', '_LOGDEBUG KEYS[1] ' .. KEYS[1] .. ' ARGV[1] ' .. ARGV[1]);" + "\n" +
             "local num= redis.call('get',KEYS[1])  " + "\n" +
             "num = num + ARGV[1]" + "\n" +
             "return num  ";
@@ -37,7 +38,7 @@ public class Slide17 {
 
     /**
      * Commands for scripts
-     * EVAL
+     * SCRIPT LOAD / EVALSHA
      */
     public void executeLoadedScript() {
         Jedis jedis = jedisNow();
