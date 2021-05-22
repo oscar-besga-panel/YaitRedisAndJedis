@@ -14,7 +14,7 @@ import static org.obapanel.yaitredisandjedis.MakeRedisConnection.jedisNow;
 /**
  * Distribute tasks
  */
-public class Slide19 {
+public class Slide21 {
 
     public static final String LIST_NAME = "KEY:DISTR_TASKS:1";
 

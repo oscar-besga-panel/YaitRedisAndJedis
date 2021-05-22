@@ -1,8 +1,13 @@
 package org.obapanel.yaitredisandjedis.slides;
 
-import redis.clients.jedis.BitOP;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.ScanParams;
+import redis.clients.jedis.ScanResult;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.obapanel.yaitredisandjedis.MakeRedisConnection.createRandomNewValue;
 import static org.obapanel.yaitredisandjedis.MakeRedisConnection.jedisNow;
 
 /**
@@ -14,61 +19,39 @@ public class Slide10 {
 
     /**
      * Command in redis
-     * GET / SET / SETNX
+     * SCAN
      */
-    public void getAndSetString() {
+    public void scan() {
         Jedis jedis = jedisNow();
-        jedis.set("KEY:STRING:1","VALUE1");
-        assert "VALUE1".equals(jedis.get("KEY1"));
-        jedis.setnx("KEY:STRING:1","VALUE11");  // SETNX prevents this value to be written
-        assert "VALUE1".equals(jedis.get("KEY1"));
-    }
+        // Given
+        for(int i=0; i < 100; i++){
+            if (i % 2 == 0) {
+                jedis.set("KEY:SCAN:EVEN:" + i, createRandomNewValue());
+            } else {
+                jedis.set("KEY:SCAN:ODD:" + i, createRandomNewValue());
+            }
+        }
 
-    /**
-     * Command in redis
-     * APPEND / SETRANGE / GETRANGE
-     */
-    public void operateOnStringAsChars() {
-        Jedis jedis = jedisNow();
-        jedis.set("KEY:STRING:2","Hello ");
-        jedis.append("KEY:STRING:2", "World");
-        assert "Hello World".equals(jedis.get("KEY:STRING:2"));
-        jedis.setrange("KEY:STRING:2",6,"Redis");
-        assert "Hello Redis".equals(jedis.get("KEY:STRING:2"));
-        assert "Redis".equals(jedis.getrange("KEY:STRING:2",6,-1));
-    }
-
-    /**
-     * Command in redis
-     * INCR / INCRBY / DECR / DECRBY
-     */
-    public void operateOnStringAsNumbers() {
-        Jedis jedis = jedisNow();
-        jedis.set("KEY:STRING:3","0");
-        jedis.incr("KEY:STRING:3");
-        assert "1".equals(jedis.get("KEY:STRING:3"));
-        jedis.incrBy("KEY:STRING:3", 2);
-        assert "3".equals(jedis.get("KEY:STRING:3"));
-        jedis.decr("KEY:STRING:3");
-        assert "2".equals(jedis.get("KEY:STRING:3"));
-        jedis.decrBy("KEY:STRING:3", 2);
-        assert "0".equals(jedis.get("KEY:STRING:3"));
-    }
-
-    /**
-     * Command in redis
-     * SETBIT / GETBIT / BITCOUNT / BITPOS / BITOP
-     */
-    public void operateOnStringAsBitmap() {
-        Jedis jedis = jedisNow();
-        jedis.setbit("KEY:STRING:4",10,true);
-        assert true == jedis.getbit("KEY:STRING:4", 10);
-        jedis.bitop(BitOP.AND, "KEY:STRING:4", "KEY2");
+        // Then
+        List<String> listOfKeys = new ArrayList<>();
+        ScanParams scanParams = new ScanParams().count(2).match("KEY:SCAN:EVEN:*"); // Scan on two-by-two responses
+        String cursor = ScanParams.SCAN_POINTER_START;
+        boolean cycleIsFinished = false;
+        while(!cycleIsFinished) {
+            ScanResult<String> partialResult =  jedis.scan(cursor, scanParams);
+            cursor = partialResult.getCursor();
+            listOfKeys.addAll(partialResult.getResult());
+            cycleIsFinished = cursor.equals(ScanParams.SCAN_POINTER_START);
+        }
+        //Expect
+        assert 50 == listOfKeys.size();
+        assert listOfKeys.contains("KEY:SCAN:EVEN:0");
     }
 
 
-//    public static void main(String[] args) {
 
-//    }
+    public static void main(String[] args) {
+        new Slide10().scan();
+    }
 
 }

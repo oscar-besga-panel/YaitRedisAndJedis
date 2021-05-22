@@ -3,45 +3,59 @@ package org.obapanel.yaitredisandjedis.slides;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
-import redis.clients.jedis.Tuple;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static org.obapanel.yaitredisandjedis.MakeRedisConnection.jedisNow;
 
 /**
- * Redis OrderedSET
+ * Redis SET
  */
 public class Slide14 {
 
 
     /**
      * Commands in redis
-     * ZADD / ZPOPMAX / ZPOPMIN
+     * SADD / SCARD / SPOP
      */
-    public void zsetOperations() {
+    public void setOperations() {
         Jedis jedis = jedisNow();
-        jedis.zadd("KEY:ZSET:1",3.0, "VALUE1");
-        jedis.zadd("KEY:ZSET:1", 2.0, "VALUE2");
-        jedis.zadd("KEY:ZSET:1", 1.0, "VALUE3"); // This will no add
-        assert 3 == jedis.zcount("KEY:ZSET:1","-inf", "+inf");
-        /*
-        DESDE 5.0
-         */
-//        Set<Tuple> popMax = jedis.zpopmax("KEY:ZSET:1",1);
-//        Set<Tuple> popMin = jedis.zpopmin("KEY:ZSET:1",1);
-//        assert "VALUE1".equals(popMax.iterator().next().getElement());
-//        assert "VALUE3".equals(popMin.iterator().next().getElement());
-        Set<String> result = jedis.zrangeByScore("KEY:ZSET:1", 1.5, 2.5 );
-        assert "VALUE1".equals(result.iterator().next()) && result.size() == 1;
+        jedis.sadd("KEY:SET:1","VALUE1");
+        jedis.sadd("KEY:SET:1","VALUE2");
+        jedis.sadd("KEY:SET:1","VALUE1"); // This will no add
+        assert 2 == jedis.scard("KEY:SET:1");
+        String pop = jedis.spop("KEY:SET:1");
+        assert "VALUE1".equals(pop) || "VALUE2".equals(pop);
     }
 
 
+    /**
+     * Commands in redis
+     * SMEMBERS / SSCAN
+     */
+    public void setScanOperations() {
+        Jedis jedis = jedisNow();
+        jedis.sadd("KEY:SET:1","VALUE1");
+        jedis.sadd("KEY:SET:1","VALUE2");
+        jedis.sadd("KEY:SET:1","VALUE3");
+        jedis.sadd("KEY:SET:1","VALUE4");
+        jedis.sadd("KEY:SET:1","VALUE5");
+        assert jedis.smembers("KEY:SET:1").contains("VALUE4");
 
-
-    public static void main(String[] args) {
-        new Slide14().zsetOperations();
+        Set<String> scanResult = new HashSet<>();
+        ScanParams scanParams = new ScanParams().count(2); // Scan on two-by-two responses
+        String cursor = ScanParams.SCAN_POINTER_START;
+        boolean cycleIsFinished = false;
+        while(!cycleIsFinished) {
+            ScanResult<String> partialResult =  jedis.sscan("KEY:SET:1", cursor, scanParams);
+            cursor = partialResult.getCursor();
+            partialResult.getResult().forEach( e -> scanResult.add(e));
+            cycleIsFinished = cursor.equals(ScanParams.SCAN_POINTER_START);
+        }
+        assert scanResult.contains("VALUE4");
     }
 
 

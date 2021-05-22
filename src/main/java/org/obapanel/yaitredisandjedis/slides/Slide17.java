@@ -3,56 +3,62 @@ package org.obapanel.yaitredisandjedis.slides;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import static org.obapanel.yaitredisandjedis.MakeRedisConnection.jedisNew;
-import static org.obapanel.yaitredisandjedis.MakeRedisConnection.jedisNow;
 
 /**
- * Redis Scripts
+ * Redis Pub/Sub
  */
 public class Slide17 {
 
-    public static final String SCRIPT = "" +
-            "redis.call('ECHO', '_LOGDEBUG KEYS[1] ' .. KEYS[1] .. ' ARGV[1] ' .. ARGV[1]);" + "\n" +
-            "local num= redis.call('get',KEYS[1])  " + "\n" +
-            "num = num + ARGV[1]" + "\n" +
-            "return num  ";
-
 
     /**
-     * Commands for scripts
-     * EVAL
+     * Commands for subscribe
+     * SUBSCRIBE / PUBLISH / UNSUSBSCRIBE
      */
-    public void executeScript() {
-        Jedis jedis = jedisNow();
-        jedis.set("KEY:SCRIPT:1","1");
-        List<String> keys = Arrays.asList("KEY:SCRIPT:1");
-        List<String> args = Arrays.asList("2");
-        Object result = jedis.eval(SCRIPT, keys, args  );
-        assert 3L == (Long)result;
-    }
+    public void subscribeAndSend() throws InterruptedException {
+        Semaphore semaphoreExit = new Semaphore(0);
+        Semaphore semaphoreSend = new Semaphore(0);
+        Thread tsubs = new Thread(() -> {
+            Jedis jedisSub = jedisNew();
+            JedisPubSub jedisPubSub = new JedisPubSub() {
+                @Override
+                public void onMessage(String channel, String message) {
+                    super.onMessage(channel, message);
+                    System.out.println("Channel " + channel + " message " + message);
+                    semaphoreExit.release();
+                    this.unsubscribe(channel);
+                }
+                @Override
+                public void onSubscribe(String channel, int subscribedChannels) {
+                    System.out.println("Client is Subscribed to channel : "+ channel + "(" + subscribedChannels + ")");
+                    semaphoreSend.release();
+                }
 
-
-    /**
-     * Commands for scripts
-     * SCRIPT LOAD / EVALSHA
-     */
-    public void executeLoadedScript() {
-        Jedis jedis = jedisNow();
-        jedis.set("KEY:SCRIPT:1","1");
-        List<String> keys = Arrays.asList("KEY:SCRIPT:1");
-        List<String> args = Arrays.asList("2");
-        String sha1 = jedis.scriptLoad(SCRIPT);
-        Object result = jedis.evalsha(sha1, keys, args  );
-        assert 3L == (Long)result;
+                @Override
+                public void onUnsubscribe(String channel, int subscribedChannels) {
+                    System.out.println("Client is Unsubscribed from channel : "+ channel + "(" + subscribedChannels + ")");
+                }
+            };
+            jedisSub.subscribe(jedisPubSub, "CHANNEL:SLIDE16"); // Here the thread is being bloqued
+        });
+        tsubs.start();
+        semaphoreSend.acquire();
+        Jedis jedisPub = jedisNew();
+        jedisPub.publish("CHANNEL:SLIDE16", "Hello World");
+        System.out.println("Message sent");
+        semaphoreExit.acquire();
+        tsubs.join();
     }
 
 
     public static void main(String[] args) {
-        new Slide17().executeScript();
+        try {
+            new Slide17().subscribeAndSend();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 

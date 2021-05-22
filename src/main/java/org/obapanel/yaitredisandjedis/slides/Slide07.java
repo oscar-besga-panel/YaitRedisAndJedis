@@ -3,15 +3,13 @@ package org.obapanel.yaitredisandjedis.slides;
 import redis.clients.jedis.Jedis;
 
 
-import java.io.UnsupportedEncodingException;
-
 import static org.obapanel.yaitredisandjedis.MakeRedisConnection.jedisNow;
-import static org.obapanel.yaitredisandjedis.MakeRedisConnection.createNewValue;
+import static org.obapanel.yaitredisandjedis.MakeRedisConnection.createRandomNewValue;
 
 /**
  * Redis data
  */
-public class Slide78 {
+public class Slide07 {
 
 
     /**
@@ -20,7 +18,7 @@ public class Slide78 {
      */
     public void setExpireTime() {
         Jedis jedis = jedisNow();
-        jedis.set("KEY:TEST:1", createNewValue());
+        jedis.set("KEY:TEST:1", createRandomNewValue());
         jedis.expire("KEY:TEST:1", 3); // 3 seconds
         jedis.pexpire("KEY:TEST:1", 3000); // 3000 miliseconds
         assert 3000 > jedis.pttl("KEY:TEST:1");
@@ -34,7 +32,7 @@ public class Slide78 {
      */
     public void setExpireTimeAndRemoveIt() {
         Jedis jedis = jedisNow();
-        jedis.set("KEY:TEST:2", createNewValue());
+        jedis.set("KEY:TEST:2", createRandomNewValue());
         jedis.expire("KEY:TEST:2", 3);
         jedis.persist("KEY:TEST:2");
     }
@@ -46,7 +44,7 @@ public class Slide78 {
      */
     public void checkDataAndRemoveIt() {
         Jedis jedis = jedisNow();
-        jedis.set("KEY:TEST:2", createNewValue());
+        jedis.set("KEY:TEST:2", createRandomNewValue());
         boolean exists = jedis.exists("KEY:TEST:2");
         jedis.del("KEY:TEST:2");
         jedis.unlink("KEY:TEST:2");
@@ -57,7 +55,7 @@ public class Slide78 {
      */
     public void stringOrBytes() {
         Jedis jedis = jedisNow();
-        jedis.set("KEY:TEST:3", createNewValue());
+        jedis.set("KEY:TEST:3", createRandomNewValue());
         byte[] bkey = new byte[]{75,69,89,58,84,69,83,84,58,52}; // "KEY:TEST:4"
         byte[] bvalue = new byte[]{72,101,108,108,111,32,87,111,114,108,100}; // "Hello World"
         jedis.set(bkey,bvalue);
@@ -67,14 +65,6 @@ public class Slide78 {
     }
 
     public static void main(String[] args) throws Exception {
-//        byte[] b = "Hello World".getBytes("UTF-8");
-//        StringBuilder sb = new StringBuilder();
-//        for(int i=0; i < b.length; i++){
-//            sb.append(b[i]).append(",");
-//        }
-//
-//        System.out.println("Hello World " + sb.toString());
-//        new Slide78().stringOrBytes();
     }
 
 }

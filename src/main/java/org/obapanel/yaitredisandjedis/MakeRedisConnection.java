@@ -10,13 +10,15 @@ public class MakeRedisConnection {
     public static String HOST = "127.0.0.1";
     public static int PORT = 6379;
 
-    private static Jedis instance;
+    private static volatile Jedis instance;
 
     public static Jedis jedisNow() {
-        if (instance == null) {
+        Jedis connection = instance;
+        while (connection == null) {
             createInstance();
+            connection = instance;
         }
-        return instance;
+        return connection;
     }
 
     public static Jedis jedisNew() {
@@ -25,12 +27,12 @@ public class MakeRedisConnection {
 
     private synchronized static void createInstance() {
         if (instance == null) {
-            instance = new Jedis(HOST, PORT);
+            instance = jedisNew();
         }
     }
 
 
-    public static String createNewValue(){
+    public static String createRandomNewValue(){
         return "VALUE_" + ThreadLocalRandom.current().nextInt();
     }
 }

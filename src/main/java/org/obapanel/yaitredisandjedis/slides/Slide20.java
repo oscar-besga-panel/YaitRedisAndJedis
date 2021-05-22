@@ -1,51 +1,32 @@
 package org.obapanel.yaitredisandjedis.slides;
 
-import org.obapanel.yaitredisandjedis.MakeRedisConnection;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPubSub;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static org.obapanel.yaitredisandjedis.MakeRedisConnection.jedisNow;
 
 /**
- * Class of multilevel cache
+ * Locks
  */
 public class Slide20 {
 
-    String hashInRedis;
-    Map<String, String> cache = new HashMap<>();
-    Jedis jedis = MakeRedisConnection.jedisNew();
+    public static final String LOCK_NAME = "KEY:LOCK:1";
 
-    public String get(String key) {
-        String data = cache.get(key);
-        if (data == null) {
-            data = jedis.hget(hashInRedis, key);
-            if (data == null) {
-                data = "GET FROM DATABASE";
-                jedis.hset(hashInRedis, key, data);
+
+    public void lock() {
+        Jedis jedis  = jedisNow();
+        boolean lockObtained = false;
+        String lockValue = ThreadLocalRandom.current().nextLong() + "_" + System.currentTimeMillis();
+        synchronized (this) {
+            while (!lockObtained) {
+                jedis.setnx(LOCK_NAME, lockValue);
+                String actualLock = jedis.get(LOCK_NAME);
+                lockObtained = lockValue.equals(actualLock);
             }
-            cache.put(key, data);
         }
-        return data;
-    }
+        // DO lock instructions
+        jedis.del(LOCK_NAME);
 
-    public void update(String key, String data) {
-        System.out.println("UPDATE DATA IN DATABASE " + key + data);
-        cache.put(key, data);
-        jedis.hset(hashInRedis, key, data);
-        jedis.publish(hashInRedis + ":Channel", key);
-    }
-
-    public void subscribeToInvalidate() {
-        Jedis jedisChannel = MakeRedisConnection.jedisNew();
-        JedisPubSub jedisPubSub = new JedisPubSub() {
-            @Override
-            public void onMessage(String channel, String message) {
-                if (channel.equals(hashInRedis  + ":Channel")) {
-                    cache.remove(message);
-                }
-            }
-        };
-        jedisChannel.subscribe(jedisPubSub, hashInRedis  + ":Channel");
     }
 }

@@ -1,14 +1,9 @@
 package org.obapanel.yaitredisandjedis.slides;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Response;
-import redis.clients.jedis.Transaction;
 
-import java.util.List;
 import java.util.Set;
 
-import static org.obapanel.yaitredisandjedis.MakeRedisConnection.createNewValue;
 import static org.obapanel.yaitredisandjedis.MakeRedisConnection.jedisNow;
 
 /**
@@ -18,40 +13,32 @@ public class Slide15 {
 
 
     /**
-     * Commands pipeline in redis
+     * Commands in redis
+     * ZADD / ZPOPMAX / ZPOPMIN
      */
-    public void pipeLineOperation() {
+    public void zsetOperations() {
         Jedis jedis = jedisNow();
-        Pipeline pipeline = jedis.pipelined();
-        for(int i= 0; i < 100; i++){
-            pipeline.set("KEY:PIPE:" + i, createNewValue());
-        }
-        Response<List<Object>> results = pipeline.exec();
+        jedis.zadd("KEY:ZSET:1",3.0, "VALUE1");
+        jedis.zadd("KEY:ZSET:1", 2.0, "VALUE2");
+        jedis.zadd("KEY:ZSET:1", 1.0, "VALUE3"); // This will no add
+        assert 3 == jedis.zcount("KEY:ZSET:1","-inf", "+inf");
+        //jedis.zcount("KEY:ZSET:1",2.0, 3.0);
+        /*
+        DESDE 5.0
+         */
+//        Set<Tuple> popMax = jedis.zpopmax("KEY:ZSET:1",1);
+//        Set<Tuple> popMin = jedis.zpopmin("KEY:ZSET:1",1);
+//        assert "VALUE1".equals(popMax.iterator().next().getElement());
+//        assert "VALUE3".equals(popMin.iterator().next().getElement());
+        Set<String> result = jedis.zrangeByScore("KEY:ZSET:1", 1.5, 2.5 );
+        assert "VALUE2".equals(result.iterator().next()) && result.size() == 1;
     }
 
-
-    /**
-     * Commands transaction in redis
-     * MULTI / EXEC
-     */
-    public void transactionOperation(boolean make3Operations) {
-        Jedis jedis = jedisNow();
-        Transaction transaction = jedis.multi();
-        transaction.set("KEY:TRANS:1","12");
-        transaction.setnx("KEY:TRANS:2","22");
-        if (make3Operations) {
-            transaction.set("KEY:TRANS:3","13");
-        }
-        Response<String> result = transaction.get("KEY:TRANS:2");
-        transaction.exec();
-        assert "22".equals(result.get());
-    }
 
 
 
     public static void main(String[] args) {
-        new Slide15().transactionOperation(true);
-        new Slide15().transactionOperation(false);
+        new Slide15().zsetOperations();
     }
 
 
