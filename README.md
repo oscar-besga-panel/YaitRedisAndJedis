@@ -11,15 +11,30 @@ Presentation about Redis and Jedis
 The presentation is in Spanish and English,  
 if anyone wants to contribute with another language; that's welcome.
 
+#### Soruce code
 
+- src/main/groovy -> Example code in groovy class
+- src/main/java -> Examples of code in java
+  - org.obapanel.yaitredisandjedis.examples -> Examples and utils for redis
+  - org.obapanel.yaitredisandjedis.MakeRedisConnection -> Util to make a redis connection
+  - org.obapanel.yaitredisandjedis.slides.SlideXX -> Example code reffering to slide number
+- src/main/script -> Examples of code in groovy script
+
+### Presentations
+
+See online on (quality is not optimal):  
+https://drive.google.com/open?id=1FvMYpSCxlZTVzIM6Yo1ICcrQQoych-Vj  
+You can open:
+- YaitRedisJedis_en
+- YaitRedisJedis_es
 
 
 ## Redis basic and tutorials
   
-https://redis.io/commands  
-https://redis.io/topics/data-types-intro  
-https://www.tutorialspoint.com/redis/index.htm   
-https://redislabs.com/redis-in-action/  
+List of commands: https://redis.io/commands  
+Data types: https://redis.io/topics/data-types-intro  
+Tutorial https://www.tutorialspoint.com/redis/index.htm   
+Book https://redislabs.com/redis-in-action/  
 Try redis online https://try.redis.io/  
 
 #### Awesome Redis
@@ -30,22 +45,25 @@ https://github.com/JamzyWang/awesome-redis
 
 ## Jedis, and java and redis  
   
-https://github.com/xetorthio/jedis  
-https://www.baeldung.com/jedis-java-redis-client-library  
-https://stackoverflow.com/questions/33842026/how-to-use-scan-commands-in-jedis  
-https://stackoverflow.com/questions/42250951/redisson-vs-jedis-for-redis  
-http://chuwiki.chuidiang.org/index.php?title=Ejemplo_con_Redis_y_Jedis  
+Jedis library github: https://github.com/xetorthio/jedis  
+Jedis quick how-to: https://www.baeldung.com/jedis-java-redis-client-library  
+Scan command how-to: https://stackoverflow.com/questions/33842026/how-to-use-scan-commands-in-jedis  
+Review of libraries: https://stackoverflow.com/questions/42250951/redisson-vs-jedis-for-redis  
+More examples: http://chuwiki.chuidiang.org/index.php?title=Ejemplo_con_Redis_y_Jedis  
+Other tutorial: https://www.tutorialspoint.com/redis/redis_java.htm  
+Good practices with Jedis: https://gist.github.com/JonCole/925630df72be1351b21440625ff2671f  
 
-#### Distributed lock in Jedis/Redis
 
-https://github.com/oscar-besga-panel/InterruptingJedisLocks
+## Clients
 
-## Desktop clients
 
-https://github.com/patrikx3/redis-ui  
-https://github.com/joeferner/redis-commander (webui, use with docker)  
+
+Webui, can be used with docker:  
+https://github.com/joeferner/redis-commander  
   
 ##### RedisDesktopManager  
+
+Most known client  
 https://redisdesktop.com  
 Is open source, but the company only provides the code, so:   
 You can compile the code into your system (instruction in github https://github.com/uglide/RedisDesktopManager)  
@@ -54,13 +72,11 @@ Use the last compiled version for Windows (https://github.com/uglide/RedisDeskto
 Don't know where to get it for Macos    
 
 
-## Presentations
 
-See online on:  
-https://drive.google.com/open?id=1FvMYpSCxlZTVzIM6Yo1ICcrQQoych-Vj
 
 ## Other
 
 Want to know about Java lamdas ?    
-Please look at this introduction (made by me):  
-https://github.com/oscar-besga-panel/YaitLambdas
+Please look at this introduction:  
+https://github.com/oscar-besga-panel/YaitLambdas  
+(disclaimer: also made by me)

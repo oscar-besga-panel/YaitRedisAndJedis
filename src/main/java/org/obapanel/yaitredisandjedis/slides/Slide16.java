@@ -5,6 +5,7 @@ import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.obapanel.yaitredisandjedis.MakeRedisConnection.createRandomNewValue;
@@ -21,11 +22,17 @@ public class Slide16 {
      */
     public void pipeLineOperation() {
         Jedis jedis = jedisNow();
+        List<Response<String>> responses = new ArrayList<>();
         Pipeline pipeline = jedis.pipelined();
         for(int i= 0; i < 100; i++){
-            pipeline.set("KEY:PIPE:" + i, createRandomNewValue());
+            Response<String> response = pipeline.set("KEY:PIPE:" + i, createRandomNewValue());
+            responses.add(response);
         }
-        Response<List<Object>> results = pipeline.exec();
+        //NO
+        // EXCEPTION
+        // System.out.println(responses.get(0).get());
+        pipeline.sync();
+        System.out.println(responses.get(0).get());
     }
 
 
@@ -53,8 +60,9 @@ public class Slide16 {
 
 
     public static void main(String[] args) {
-        new Slide16().transactionOperation(true);
-        new Slide16().transactionOperation(false);
+        new Slide16().pipeLineOperation();
+//        new Slide16().transactionOperation(true);
+//        new Slide16().transactionOperation(false);
     }
 
 
