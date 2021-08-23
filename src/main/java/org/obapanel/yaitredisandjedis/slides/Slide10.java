@@ -4,8 +4,8 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.obapanel.yaitredisandjedis.MakeRedisConnection.createRandomNewValue;
 import static org.obapanel.yaitredisandjedis.MakeRedisConnection.jedisNow;
@@ -33,7 +33,7 @@ public class Slide10 {
         }
 
         // Then
-        List<String> listOfKeys = new ArrayList<>();
+        Set<String> listOfKeys = new HashSet<>(); // Set to avoid duplicates
         ScanParams scanParams = new ScanParams().count(2).match("KEY:SCAN:EVEN:*"); // Scan on two-by-two responses
         String cursor = ScanParams.SCAN_POINTER_START;
         boolean cycleIsFinished = false;

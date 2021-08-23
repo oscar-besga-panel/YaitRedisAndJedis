@@ -58,7 +58,7 @@ public class Slide13 {
         jedis.hset("KEY:HASH:2","key1i","value1i");
         jedis.hset("KEY:HASH:2","key1j","value1j");
 
-        Map<String, String> scanResult = new HashMap<>();
+        Map<String, String> scanResult = new HashMap<>(); // Map avoids duplicates
         ScanParams scanParams = new ScanParams().count(2); // Scan on two-by-two responses
         String cursor = ScanParams.SCAN_POINTER_START;
         boolean cycleIsFinished = false;

@@ -8,8 +8,10 @@ import redis.clients.jedis.ScanResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -22,12 +24,13 @@ public class UtilsWithScan {
     /**
      * Retrieve keys of redis with a pattern
      * Can be redone to hscan and others scanss with ease
+     * Take in account that redis *scan can return duplicates but this code prevents it
      * @param jedis Jedis conection
      * @param pattern String with pattern to match
      * @return list of keys that matches
      */
     public static List<String> retriveListOfKeys(Jedis jedis , String pattern) {
-        List<String> listOfKeys = new ArrayList<>();
+        Set<String> listOfKeys = new HashSet<>();
         ScanParams scanParams = new ScanParams().match(pattern); // Scan on two-by-two responses
         String cursor = ScanParams.SCAN_POINTER_START;
         do {
@@ -35,13 +38,14 @@ public class UtilsWithScan {
             cursor = partialResult.getCursor();
             listOfKeys.addAll(partialResult.getResult());
         }  while(!cursor.equals(ScanParams.SCAN_POINTER_START));
-        return listOfKeys;
+        return new ArrayList<>(listOfKeys);
     }
 
 
     /**
      * Retrieve keys of redis with a pattern, and their associated values
      * Can be redone to hscan and others scanss with ease
+     * Take in account that redis *scan can return duplicates but this code prevents it
      * @param jedis Jedis conection
      * @param pattern String with pattern to match
      * @return list of keys that matches
@@ -61,6 +65,7 @@ public class UtilsWithScan {
     /**
      * Retrieve keys of redis with a pattern, and their associated values
      * Can be redone to hscan and others scanss with ease
+     * Take in account that redis *scan can return duplicates but this code prevents it
      * This version is more complicated but groups all the get operations into a pipeline,
      *   which greatly increases performance
      * @param jedis Jedis conection
@@ -93,6 +98,7 @@ public class UtilsWithScan {
     /**
      * Retrieve keys of redis with a patter and executes the function for every result
      * Can be redone to hscan and others scanss with ease
+     * CAUTION: Take in account that redis *scan can return duplicates, you must handle it
      * @param jedis Jedis conection
      * @param pattern String with pattern to match
      * @param onKey What to do with each key retrieved
