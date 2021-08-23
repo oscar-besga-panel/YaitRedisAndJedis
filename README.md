@@ -1,6 +1,6 @@
 # YaitRedisAndJedis
 Yet Another Introduction to Redis and Jedis (Java)
-(version 1.0)
+(version 1.2)
 
 
 This is a open source creative commons project to give a quick but almost complete and understable introduction to Redis and Java library Jedis, with examples.
