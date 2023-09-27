@@ -36,6 +36,7 @@ Data types: https://redis.io/topics/data-types-intro
 Tutorial https://www.tutorialspoint.com/redis/index.htm   
 Book https://redislabs.com/redis-in-action/  
 Try redis online https://try.redis.io/  
+Redis University (great FREE courses and tutorials ) https://university.redis.com/  
 
 #### Awesome Redis
 A curated list of amazingly awesome redis and redis ecosystem resources.     
